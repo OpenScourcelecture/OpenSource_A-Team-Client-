@@ -1,70 +1,170 @@
 package client;
 
-import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.*;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import client.SendThread;
 
-class FrameExam
-{
-	private static FrameExam exam = new FrameExam();
-	JFrame frame = new JFrame("Quiz");
-	JTextArea label = new JTextArea();
-	JScrollPane sp = new JScrollPane(label);
+public class ChatClient extends Application{
+	static Socket socket;
 	
-	public static FrameExam getFrame() {
-		return exam;
+	
+	VBox root = new VBox();
+   	TextArea rootMessage = new TextArea();
+   	static TextArea chatlog = new TextArea();
+	static TextField chatField = new TextField(null);
+   	TextArea loging = new TextArea();
+   	TextArea quizDB = new TextArea();
+   	static Button sendButton = new Button();
+   	GridPane grid = new GridPane();
+    static String SendMessage;
+	
+	@Override
+	public void start(Stage stage) {
+	   	try {
+		   	root.setPadding(new Insets(10)); // 안쪽 여백 설정
+		   	root.setSpacing(10); // 컨트롤 간의 수평 간격 설정
+		   	rootMessage.setDisable(true);
+	    	rootMessage.prefWidthProperty().bind(stage.widthProperty());
+	    	chatlog.setDisable(true);
+	    	chatlog.prefWidthProperty().bind(stage.widthProperty());
+	    	chatlog.prefHeightProperty().bind(stage.heightProperty());
+	    	
+	    	loging.setDisable(true);
+	    	loging.prefWidthProperty().bind(stage.widthProperty());
+	    	loging.prefHeightProperty().bind(stage.heightProperty());
+		    	
+	    	quizDB.setDisable(true);
+	    	quizDB.prefWidthProperty().bind(stage.widthProperty());
+	    	quizDB.prefHeightProperty().bind(stage.heightProperty());
+		    	
+	    	sendButton.setText("전 송");
+	    	sendButton.prefWidthProperty().bind(stage.widthProperty());
+	    	sendButton.setMaxWidth(1000);
+		    	
+	    	chatField.prefWidthProperty().bind(stage.widthProperty());
+	
+	    	grid.setVgap(10);
+	    	grid.setHgap(10);
+	    	grid.add(chatlog, 0, 0, 2, 2);
+	    	grid.add(chatField, 0, 2, 1, 1);
+	    	grid.add(sendButton, 1, 2, 1, 1);
+	    	grid.add(loging, 2, 0, 1, 1); 
+	    	grid.add(quizDB, 2, 1, 1, 1);
+		    	
+	    	sendButton.setOnAction(new EventHandler<ActionEvent>() {
+		    		 
+	    	    @Override
+	   	    public void handle(ActionEvent event) {
+	    	    	send(chatField.getText());
+	    	    	chatField.setText("");
+	    	    	chatField.requestFocus();
+	    	    }
+	    	});
+		    	
+	    	ObservableList<Node> list = root.getChildren();
+	    	list.add(rootMessage);
+	    	list.add(grid);
+		    	//list.add(grid2);
+		    	Scene scene = new Scene(root, 500, 500);
+	
+	    	stage.setTitle("채팅창");
+	    	stage.setScene(scene);
+	    	stage.show();	
+    	
+    	} catch(Exception e) {
+    		System.out.println(e);
+    	}
 	}
 	
-	public void createFrame()
-	{
-		//frame.add(label);
-		frame.setSize(500, 600);
-		frame.setVisible(true);
-		//label.setHorizontalAlignment(SwingConstants.CENTER);
-		//label.setVerticalAlignment(SwingConstants.CENTER);
-		//contentPane.add(sp);
-		frame.add(label);
-	}
-	
-	public void text(String text) {
-		label.setText(text);
-		frame.add(label);
-	}
-}
-
-public class ChatClient {
-
-	public static String UserID;
-	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
+	public static void stopClient() {
 		try {
-			FrameExam temp = new FrameExam();
-			temp = FrameExam.getFrame();
-			temp.createFrame();
-			Socket c_socket = new Socket("192.168.0.13", 8888);
-
-			ReceiveThread rec_thread = new ReceiveThread();
-			rec_thread.setSocket(c_socket);
-			
-			SendThread send_thread = new SendThread();
-			send_thread.setSocket(c_socket);
-			
-			send_thread.start();
-			rec_thread.start();
-		
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			if(socket != null && !socket.isClosed()) {
+				socket.close();
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void receive() {
+		while(true) {
+			try {
+				InputStream in = socket.getInputStream();
+				byte[] buffer = new byte[512];
+				int length = in.read(buffer);
+				if(length == -1) throw new IOException();
+				String message = new String(buffer, 0, length, "UTF-8");
+
+				Platform.runLater(()->{
+					chatlog.appendText(message + "\n");
+				});
+				
+			} catch (IOException e) {
+				stopClient();
+				break;
+			}
+		}
+	}
+	
+	public static void send(String message) {
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					OutputStream out = socket.getOutputStream();
+					byte[] buffer = message.getBytes("UTF-8");
+					out.write(buffer);
+					out.flush();
+				} catch (Exception e) {
+					stopClient();
+				}
+			}
+		};
+		
+		thread.start();
+	}
+	
+	public static void startClient(String IP, int port) {
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					socket = new Socket(IP, port);
+					System.out.println("[서버 접속 성공]");
+					chatlog.appendText("[서버 접속 성공]" + "\n");
+					receive();
+				} catch (Exception e) {
+					if(!socket.isClosed()) {
+					stopClient();
+					System.out.println("[서버 접속 실패]");
+					Platform.exit();
+					}
+				}
+			}
+		};
+		thread.start();
+	}
+	
+	public static void main(String[] args) {
+		startClient("192.168.0.13", 8888);
+		launch(args);
 	}
 }
