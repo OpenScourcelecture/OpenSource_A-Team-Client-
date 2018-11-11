@@ -1,65 +1,69 @@
 package client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import javafx.application.Application;
-import javafx.application.Platform;
+import java.io.*;
+import java.sql.*;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
+import javafx.application.*;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import client.SendThread;
 
 public class ChatClient extends Application{
 	static Socket socket;
 	
 	
 	VBox root = new VBox();
-   	TextArea rootMessage = new TextArea();
+	static TextArea rootMessage = new TextArea();
    	static TextArea chatlog = new TextArea();
-	static TextField chatField = new TextField(null);
-   	TextArea loging = new TextArea();
-   	TextArea quizDB = new TextArea();
+	static TextField chatField = new TextField();
+	static TextArea loging = new TextArea("접속 중인 사람\n------------\n");
+	static TextArea quizDB = new TextArea("퀴즈 목록\n--------\n");
    	static Button sendButton = new Button();
-   	GridPane grid = new GridPane();
-    static String SendMessage;
+   	static Button endButton = new Button();
+   	static GridPane grid = new GridPane();
+   	static TextInputDialog dialog = new TextInputDialog();
+   	static String userName = null;
 	
 	@Override
 	public void start(Stage stage) {
-	   	try {
+	   	try {	   		
 		   	root.setPadding(new Insets(10)); // 안쪽 여백 설정
 		   	root.setSpacing(10); // 컨트롤 간의 수평 간격 설정
-		   	rootMessage.setDisable(true);
+		   	
+		   	rootMessage.setEditable(false);
 	    	rootMessage.prefWidthProperty().bind(stage.widthProperty());
-	    	chatlog.setDisable(true);
+	    	
+	    	//chatlog.setDisable(true);
 	    	chatlog.prefWidthProperty().bind(stage.widthProperty());
 	    	chatlog.prefHeightProperty().bind(stage.heightProperty());
+	    	chatlog.setWrapText(true); 
+	    	chatlog.setEditable(false);
 	    	
-	    	loging.setDisable(true);
+	    	loging.setEditable(false);
 	    	loging.prefWidthProperty().bind(stage.widthProperty());
 	    	loging.prefHeightProperty().bind(stage.heightProperty());
 		    	
-	    	quizDB.setDisable(true);
+	    	quizDB.setEditable(false);
 	    	quizDB.prefWidthProperty().bind(stage.widthProperty());
 	    	quizDB.prefHeightProperty().bind(stage.heightProperty());
 		    	
 	    	sendButton.setText("전 송");
 	    	sendButton.prefWidthProperty().bind(stage.widthProperty());
 	    	sendButton.setMaxWidth(1000);
+	    	
+	    	endButton.setText("나 가 기");
+	    	endButton.prefWidthProperty().bind(stage.widthProperty());
+	    	endButton.setMaxWidth(500);
 		    	
 	    	chatField.prefWidthProperty().bind(stage.widthProperty());
 	
@@ -70,17 +74,60 @@ public class ChatClient extends Application{
 	    	grid.add(sendButton, 1, 2, 1, 1);
 	    	grid.add(loging, 2, 0, 1, 1); 
 	    	grid.add(quizDB, 2, 1, 1, 1);
+	    	grid.add(endButton, 2, 2, 1, 1);
 		    	
+	    	dialog.setTitle("이름 입력 창");
+	    	dialog.setHeaderText("채팅 방에서 사용할 이름을 입력하세요");
+	    	dialog.setContentText("이름 : ");
+
+	    	Optional<String> result = dialog.showAndWait();
+	    	if (result.isPresent()){
+	    	    System.out.println("이름 : " + result.get());
+	    	    if(result.get().equals("")) {
+	    	    	userName = "name:Null";
+	    	    	send(userName);
+	    	    }
+	    	    
+	    	    else {
+		    	    userName = "name:" + result.get();
+		    	    send(userName);
+	    	    }
+	    	}
+	    	
 	    	sendButton.setOnAction(new EventHandler<ActionEvent>() {
-		    		 
 	    	    @Override
-	   	    public void handle(ActionEvent event) {
+	    	    public void handle(ActionEvent event) {
 	    	    	send(chatField.getText());
 	    	    	chatField.setText("");
 	    	    	chatField.requestFocus();
 	    	    }
 	    	});
-		    	
+	    	
+	    	endButton.setOnAction(new EventHandler<ActionEvent>() {
+	    	    @Override
+	    	    public void handle(ActionEvent event) {
+	    	    	send("q" + userName);
+	    	    	try{
+	    	    		Thread.sleep(2);
+	    	    	}catch(Exception e){
+	    	    		e.printStackTrace();
+	    	    	}
+	    	    	stopClient();
+	    	    	stage.hide();
+	    	    }
+	    	});
+	    	
+	    	chatField.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		    		@Override
+		    		public void handle(KeyEvent event) {
+		    			if(event.getCode() == KeyCode.ENTER) {
+			    			send(chatField.getText());
+			    	    	chatField.setText("");
+			    	    	chatField.requestFocus();
+		    			}
+		    		}
+	    	});
+	    	
 	    	ObservableList<Node> list = root.getChildren();
 	    	list.add(rootMessage);
 	    	list.add(grid);
@@ -96,9 +143,10 @@ public class ChatClient extends Application{
     	}
 	}
 	
-	public static void stopClient() {
+	public static void stopClient() {		
 		try {
-			if(socket != null && !socket.isClosed()) {
+			if(socket != null && !socket.isClosed()) {	
+				send(userName);
 				socket.close();
 			}
 		} catch (Exception e) {
@@ -116,7 +164,12 @@ public class ChatClient extends Application{
 				String message = new String(buffer, 0, length, "UTF-8");
 
 				Platform.runLater(()->{
-					chatlog.appendText(message + "\n");
+					if(message.length() > 5 && message.substring(0,5).equals("name:"))
+						loging.appendText(message.substring(5) + "\n");
+					else if(message.length() > 2 && message.substring(0,1).equals("m"))
+						chatlog.appendText(message.substring(1) + "\n");
+					else
+						chatlog.appendText(message + "\n");
 				});
 				
 			} catch (IOException e) {
@@ -150,6 +203,7 @@ public class ChatClient extends Application{
 					socket = new Socket(IP, port);
 					System.out.println("[서버 접속 성공]");
 					chatlog.appendText("[서버 접속 성공]" + "\n");
+	    	    	chatField.requestFocus();
 					receive();
 				} catch (Exception e) {
 					if(!socket.isClosed()) {
