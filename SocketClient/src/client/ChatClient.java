@@ -164,12 +164,20 @@ public class ChatClient extends Application{
 				String message = new String(buffer, 0, length, "UTF-8");
 
 				Platform.runLater(()->{
-					if(message.length() > 5 && message.substring(0,5).equals("name:"))
-						loging.appendText(message.substring(5) + "\n");
-					else if(message.length() > 2 && message.substring(0,1).equals("m"))
+					if(message.length() >= 1 && message.substring(0,1).equals("m"))
 						chatlog.appendText(message.substring(1) + "\n");
-					else
-						chatlog.appendText(message + "\n");
+					
+					if(message.length() >= 8 && message.substring(0, 8).equals("userinfo") 
+							&& !loging.getText().contains(message.substring(8))) {
+						loging.appendText(message.substring(8) + "\n");
+					}
+					
+					if(message.length() >= 8 && message.substring(0, 6).equals("delete") 
+							&& loging.getText().contains(message.substring(6))) {
+						loging.setText(loging.getText().replace(message.substring(6)+"\n", ""));
+						System.out.println(message.substring(6));
+					}
+						
 				});
 				
 			} catch (IOException e) {
