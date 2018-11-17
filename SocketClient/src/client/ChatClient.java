@@ -20,14 +20,16 @@ import javafx.stage.Stage;
 
 public class ChatClient extends Application{
 	static Socket socket;
-	
+	static HashMap<Integer, String> quizDB = new HashMap<Integer, String>();
+	static String result = "0";
+	static String chatLogtemp = "";
 	
 	VBox root = new VBox();
 	static TextArea rootMessage = new TextArea();
    	static TextArea chatlog = new TextArea();
 	static TextField chatField = new TextField();
 	static TextArea loging = new TextArea("접속 중인 사람\n------------\n");
-	static TextArea quizDB = new TextArea("퀴즈 목록\n--------\n");
+	static TextArea quizlog = new TextArea("퀴즈 목록\n--------\n");
    	static Button sendButton = new Button();
    	static Button endButton = new Button();
    	static GridPane grid = new GridPane();
@@ -53,9 +55,9 @@ public class ChatClient extends Application{
 	    	loging.prefWidthProperty().bind(stage.widthProperty());
 	    	loging.prefHeightProperty().bind(stage.heightProperty());
 		    	
-	    	quizDB.setEditable(false);
-	    	quizDB.prefWidthProperty().bind(stage.widthProperty());
-	    	quizDB.prefHeightProperty().bind(stage.heightProperty());
+	    	quizlog.setEditable(false);
+	    	quizlog.prefWidthProperty().bind(stage.widthProperty());
+	    	quizlog.prefHeightProperty().bind(stage.heightProperty());
 		    	
 	    	sendButton.setText("전 송");
 	    	sendButton.prefWidthProperty().bind(stage.widthProperty());
@@ -73,7 +75,7 @@ public class ChatClient extends Application{
 	    	grid.add(chatField, 0, 2, 1, 1);
 	    	grid.add(sendButton, 1, 2, 1, 1);
 	    	grid.add(loging, 2, 0, 1, 1); 
-	    	grid.add(quizDB, 2, 1, 1, 1);
+	    	grid.add(quizlog, 2, 1, 1, 1);
 	    	grid.add(endButton, 2, 2, 1, 1);
 		    	
 	    	dialog.setTitle("이름 입력 창");
@@ -108,7 +110,7 @@ public class ChatClient extends Application{
 	    	    public void handle(ActionEvent event) {
 	    	    	send("q" + userName);
 	    	    	try{
-	    	    		Thread.sleep(2);
+	    	    		Thread.sleep(100);
 	    	    	}catch(Exception e){
 	    	    		e.printStackTrace();
 	    	    	}
@@ -143,6 +145,13 @@ public class ChatClient extends Application{
     	}
 	}
 	
+	public static void runQuiz() {
+		chatLogtemp = chatlog.getText();
+		chatlog.setText("");
+		
+		chatlog.appendText(quizDB.get(1) + "\n");
+	}
+	
 	public static void stopClient() {		
 		try {
 			if(socket != null && !socket.isClosed()) {	
@@ -158,26 +167,50 @@ public class ChatClient extends Application{
 		while(true) {
 			try {
 				InputStream in = socket.getInputStream();
-				byte[] buffer = new byte[512];
+				byte[] buffer = new byte[2048];
 				int length = in.read(buffer);
 				if(length == -1) throw new IOException();
 				String message = new String(buffer, 0, length, "UTF-8");
 
 				Platform.runLater(()->{
-					if(message.length() >= 1 && message.substring(0,1).equals("m"))
+					if(message.length() >= 6 && message.substring(0, 5).equals("mquiz")) {
+						quizDB.put(1, message.split("\\^")[2]);
+						result = message.split("\\^")[3];
+						System.out.println(result);
+					}
+					
+					else if(message.length() >= 10 && message.substring(0, 10).equals("mstartquiz")) {
+						runQuiz();	
+					}
+					
+					else if(message.length() >= 3 && message.substring(0, 3).equals("m답:")) {
+						System.out.println(message.substring(3));
+						if(mark(message.substring(3))) {
+							chatlog.setText(chatLogtemp + "\n");
+							send("정답입니다.");
+						}
+						else {
+							chatlog.setText(chatLogtemp + "\n");
+							send("오답입니다.");
+						}
+						
+					}
+					
+					else if(message.length() >= 1 && message.substring(0,1).equals("m"))
 						chatlog.appendText(message.substring(1) + "\n");
 					
-					if(message.length() >= 8 && message.substring(0, 8).equals("userinfo") 
+					else if(message.length() >= 8 && message.substring(0, 8).equals("userinfo") 
 							&& !loging.getText().contains(message.substring(8))) {
 						loging.appendText(message.substring(8) + "\n");
 					}
 					
-					if(message.length() >= 8 && message.substring(0, 6).equals("delete") 
+					else if(message.length() >= 6 && message.substring(0, 6).equals("delete") 
 							&& loging.getText().contains(message.substring(6))) {
 						loging.setText(loging.getText().replace(message.substring(6)+"\n", ""));
 						System.out.println(message.substring(6));
 					}
-						
+					
+					
 				});
 				
 			} catch (IOException e) {
@@ -185,6 +218,13 @@ public class ChatClient extends Application{
 				break;
 			}
 		}
+	}
+	
+	public static boolean mark(String quizResult) {
+		if(quizResult.equals(result))
+			return true;
+		else
+			return false;
 	}
 	
 	public static void send(String message) {
