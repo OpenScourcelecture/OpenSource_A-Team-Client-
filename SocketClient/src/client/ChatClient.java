@@ -28,6 +28,9 @@ public class ChatClient extends Application{
 	static TextArea rootMessage = new TextArea();
    	static TextArea chatlog = new TextArea();
 	static TextField chatField = new TextField();
+	static TextField ipField = new TextField();
+	static TextField portField = new TextField();
+	static TextField timerField = new TextField();
 	static TextArea loging = new TextArea("접속 중인 사람\n------------\n");
 	static TextArea quizlog = new TextArea("퀴즈 목록\n--------\n");
    	static Button sendButton = new Button();
@@ -68,15 +71,25 @@ public class ChatClient extends Application{
 	    	endButton.setMaxWidth(500);
 		    	
 	    	chatField.prefWidthProperty().bind(stage.widthProperty());
+	    	
+	    	ipField.prefWidthProperty().bind(stage.widthProperty());
+	    	
+	    	portField.prefWidthProperty().bind(stage.widthProperty());
+	    	
+	    	timerField.setEditable(false);
+	    	timerField.prefWidthProperty().bind(stage.widthProperty());
 	
 	    	grid.setVgap(10);
 	    	grid.setHgap(10);
-	    	grid.add(chatlog, 0, 0, 2, 2);
-	    	grid.add(chatField, 0, 2, 1, 1);
-	    	grid.add(sendButton, 1, 2, 1, 1);
-	    	grid.add(loging, 2, 0, 1, 1); 
-	    	grid.add(quizlog, 2, 1, 1, 1);
-	    	grid.add(endButton, 2, 2, 1, 1);
+	    	grid.add(ipField, 0, 0, 1, 1);
+	    	grid.add(portField, 1, 0, 1, 1);
+	    	grid.add(timerField, 2, 0, 1, 1);
+	    	grid.add(chatlog, 0, 1, 2, 2);
+	    	grid.add(chatField, 0, 3, 1, 1);
+	    	grid.add(sendButton, 1, 3, 1, 1);
+	    	grid.add(loging, 2, 1, 1, 1); 
+	    	grid.add(quizlog, 2, 2, 1, 1);
+	    	grid.add(endButton, 2, 3, 1, 1);
 		    	
 	    	dialog.setTitle("이름 입력 창");
 	    	dialog.setHeaderText("채팅 방에서 사용할 이름을 입력하세요");
@@ -86,7 +99,7 @@ public class ChatClient extends Application{
 	    	if (result.isPresent()){
 	    	    System.out.println("이름 : " + result.get());
 	    	    if(result.get().equals("")) {
-	    	    	userName = "name:Null";
+	    	    	userName = "name:익명";
 	    	    	send(userName);
 	    	    }
 	    	    
@@ -108,7 +121,7 @@ public class ChatClient extends Application{
 	    	endButton.setOnAction(new EventHandler<ActionEvent>() {
 	    	    @Override
 	    	    public void handle(ActionEvent event) {
-	    	    	send("q" + userName);
+	    	    	send("quit" + userName);
 	    	    	try{
 	    	    		Thread.sleep(100);
 	    	    	}catch(Exception e){
@@ -132,6 +145,7 @@ public class ChatClient extends Application{
 	    	
 	    	ObservableList<Node> list = root.getChildren();
 	    	list.add(rootMessage);
+	    	
 	    	list.add(grid);
 		    	//list.add(grid2);
 		    	Scene scene = new Scene(root, 500, 500);
@@ -173,31 +187,38 @@ public class ChatClient extends Application{
 				String message = new String(buffer, 0, length, "UTF-8");
 
 				Platform.runLater(()->{
-					if(message.length() >= 6 && message.substring(0, 5).equals("mquiz")) {
-						quizDB.put(1, message.split("\\^")[2]);
-						result = message.split("\\^")[3];
-						System.out.println(result);
-					}
-					
-					else if(message.length() >= 10 && message.substring(0, 10).equals("mstartquiz")) {
-						runQuiz();	
-					}
-					
-					else if(message.length() >= 3 && message.substring(0, 3).equals("m답:")) {
-						System.out.println(message.substring(3));
-						if(mark(message.substring(3))) {
-							chatlog.setText(chatLogtemp + "\n");
-							send("정답입니다.");
-						}
-						else {
-							chatlog.setText(chatLogtemp + "\n");
-							send("오답입니다.");
+					if(message.length() >= 1 && message.substring(0,1).equals("m")) {
+						if(message.length() >= 6 && message.substring(0, 5).equals("mquiz")) {
+							quizDB.put(1, message.split("\\^")[2]);
+							result = message.split("\\^")[3];
+							System.out.println(result);
 						}
 						
+						else if(message.length() >= 10 && message.substring(0, 10).equals("mstartquiz")) {
+							runQuiz();	
+						}
+						
+						else if(message.length() >= 3 && message.substring(0, 3).equals("m답:")) {
+							System.out.println(message.substring(3));
+							if(mark(message.substring(3))) {
+								send("정답입니다.");
+							}
+							else {
+								send("오답입니다.");
+							}
+							
+						}
+						
+						
+						else if(message.length() >= 7 && message.substring(0, 7).equals("mDBquiz")) {
+							quizlog.setText("퀴즈 목록\n--------\n");
+							quizlog.appendText(message.substring(7));
+							
+						}
+						
+						else
+							chatlog.appendText(message.substring(1) + "\n");
 					}
-					
-					else if(message.length() >= 1 && message.substring(0,1).equals("m"))
-						chatlog.appendText(message.substring(1) + "\n");
 					
 					else if(message.length() >= 8 && message.substring(0, 8).equals("userinfo") 
 							&& !loging.getText().contains(message.substring(8))) {
@@ -266,7 +287,7 @@ public class ChatClient extends Application{
 	}
 	
 	public static void main(String[] args) {
-		startClient("192.168.0.13", 8888);
+		startClient("192.168.43.206", 8888);
 		launch(args);
 	}
 }
