@@ -198,6 +198,7 @@ public class ChatClient extends Application{
 							count = 0;
 							timerField.setText("");
 							System.out.println("정답 : " + correctResult + ", 오답 : " + incorrectResult);
+							send("userResult정답 : " + correctResult + ", 오답 : " + incorrectResult);
 							correctResult = 0;
 							incorrectResult = 0;
 							chatlog.setText(chatLogtemp);
@@ -207,7 +208,8 @@ public class ChatClient extends Application{
 						}
 						
 						try {sleep(100);} catch(Exception e) {}
-						send("전공");
+						if(!temp.equals(userResult)) { incorrectResult++; userResult = ""; }
+						send("다음");
 					} catch (Exception e) {
 						try {sleep(50);} catch(Exception e2) {} 
 						Quiz.interrupted();
@@ -227,8 +229,8 @@ public class ChatClient extends Application{
 					while(second >= 0) {						
 						try {
 							timerField.setText(" " + Integer.toString(second) + "초");
-							sleep(1000);
 							second--;
+							sleep(1000);
 						} catch (Exception e) {
 							Timer.interrupted();
 						}
@@ -243,13 +245,11 @@ public class ChatClient extends Application{
 	public static boolean mark(String quizResult) {
 		if(result.equals(quizResult)) {
 			correctResult++;
-			userResult = "";
 			return true;
 		}
 		
 		else {
 			incorrectResult++;
-			userResult = "";
 			return false;
 		}
 	}
@@ -292,6 +292,7 @@ public class ChatClient extends Application{
 						
 						else if(message.length() >= 3 && message.substring(0, 3).equals("m답:")) {
 							System.out.println(message.substring(3));
+							userResult = message.substring(3);
 							if(mark(message.substring(3))) {
 								send("정답입니다.\n");
 							}
@@ -306,7 +307,10 @@ public class ChatClient extends Application{
 						else if(message.length() >= 7 && message.substring(0, 7).equals("mDBquiz")) {
 							quizlog.setText("퀴즈 목록\n--------\n");
 							quizlog.appendText(message.substring(7));
-							
+						}
+						
+						else if(message.length() >= 9 && message.substring(0, 9).equals("userResult")) {
+							chatlog.appendText(message.substring(9));
 						}
 						
 						else
