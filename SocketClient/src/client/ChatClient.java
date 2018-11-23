@@ -10,7 +10,9 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
@@ -27,91 +29,95 @@ public class ChatClient extends Application{
 	static String userResult = "";
 	static String chatLogtemp = "";
 	
-	VBox root = new VBox();
+	Scene scene;
+	static Label userNameLabel = new Label("유저 이름");
+	static TextField userNameField = new TextField();
+	static Button dialogbutton = new Button("접속");
+	HBox preRoot = new HBox(3.,userNameLabel,userNameField,dialogbutton);
 	static TextArea rootMessage = new TextArea();
-   	static TextArea chatlog = new TextArea();
-	static TextField chatField = new TextField();
+   	
+   	
 	static TextField ipField = new TextField();
 	static TextField portField = new TextField();
 	static TextField timerField = new TextField();
-	static TextArea loging = new TextArea("접속 중인 사람\n------------\n");
-	static TextArea quizlog = new TextArea("퀴즈 목록\n--------\n");
-   	static Button sendButton = new Button();
-   	static Button endButton = new Button();
-   	static GridPane grid = new GridPane();
-   	static TextInputDialog dialog = new TextInputDialog();
-   	static String userName = null;
+	HBox serverBar = new HBox(3.,ipField,portField,timerField);
 	
+   	Button sendButton = new Button("전 송");
+   	Button endButton = new Button("나 가 기");
+   	HBox buttonBar = new HBox(2. ,sendButton,endButton);	
+
+   	static TextArea chatlog = new TextArea();
+   	static TextField chatField = new TextField();
+   	static TextArea loging = new TextArea("접속 중인 사람\n------------\n");
+   	static TextArea quizlog = new TextArea("퀴즈 목록\n--------\n");
+   	GridPane grid = new GridPane();
+   	
+	VBox root = new VBox(3.,rootMessage,serverBar,grid);
+ 
+  	static String userName = null;
+
 	@Override
 	public void start(Stage stage) {
-	   	try {	   		
-		   	root.setPadding(new Insets(10)); // 안쪽 여백 설정
-		   	root.setSpacing(10); // 컨트롤 간의 수평 간격 설정
-		   	
-		   	rootMessage.setEditable(false);
+	   	try {
+    		preRoot.setId("loginhbox");			//set css seleter for tag
+    		root.setId("chatvbox");
+    		userNameLabel.setId("loginlabel");
+	   		
+	   		preRoot.setAlignment(Pos.CENTER);;
+	   	    
+    		root.setPadding(new Insets(10));					 // set inner space
+    		root.setSpacing(10); 								// set space each other in VBox 
+		   	rootMessage.setEditable(false);										//textArea in vBox
 	    	rootMessage.prefWidthProperty().bind(stage.widthProperty());
-	    	
-	    	//chatlog.setDisable(true);
-	    	chatlog.prefWidthProperty().bind(stage.widthProperty());
-	    	chatlog.prefHeightProperty().bind(stage.heightProperty());
-	    	chatlog.setWrapText(true); 
+	   
 	    	chatlog.setEditable(false);
-	    	
-	    	loging.setEditable(false);
+	    	chatlog.setWrapText(true); 	    	
+	    	chatlog.prefWidthProperty().bind(stage.widthProperty());			// grid in vBOx 0022  //textArea
+	    	chatlog.prefHeightProperty().bind(stage.heightProperty());	    	
+	    	loging.setEditable(false);											// grid in vBOx 2011	//textArea
 	    	loging.prefWidthProperty().bind(stage.widthProperty());
-	    	loging.prefHeightProperty().bind(stage.heightProperty());
-		    	
-	    	quizlog.setEditable(false);
+	    	loging.prefHeightProperty().bind(stage.heightProperty());    	
+	    	quizlog.setEditable(false);											// grid in vBox 2111	//textArea
 	    	quizlog.prefWidthProperty().bind(stage.widthProperty());
 	    	quizlog.prefHeightProperty().bind(stage.heightProperty());
-		    	
-	    	sendButton.setText("전 송");
-	    	sendButton.prefWidthProperty().bind(stage.widthProperty());
-	    	sendButton.setMaxWidth(1000);
-	    	
-	    	endButton.setText("나 가 기");
-	    	endButton.prefWidthProperty().bind(stage.widthProperty());
-	    	endButton.setMaxWidth(500);
-		    	
-	    	chatField.prefWidthProperty().bind(stage.widthProperty());
-	    	
-	    	ipField.prefWidthProperty().bind(stage.widthProperty());
-	    	
-	    	portField.prefWidthProperty().bind(stage.widthProperty());
+		    
+	    	chatField.prefWidthProperty().bind(stage.widthProperty());			// grid in vBox 0211	//textfield
+	    	sendButton.prefWidthProperty().bind(buttonBar.widthProperty());
+	    	endButton.prefWidthProperty().bind(buttonBar.widthProperty());    
 	    	
 	    	timerField.setEditable(false);
-	    	timerField.prefWidthProperty().bind(stage.widthProperty());
-	
+	    	timerField.prefWidthProperty().bind(serverBar.widthProperty());
+	    	ipField.prefWidthProperty().bind(serverBar.widthProperty());
+	    	portField.prefWidthProperty().bind(serverBar.widthProperty());
+	    		
 	    	grid.setVgap(10);
-	    	grid.setHgap(10);
-	    	grid.add(ipField, 0, 0, 1, 1);
-	    	grid.add(portField, 1, 0, 1, 1);
-	    	grid.add(timerField, 2, 0, 1, 1);
-	    	grid.add(chatlog, 0, 1, 2, 2);
-	    	grid.add(chatField, 0, 3, 1, 1);
-	    	grid.add(sendButton, 1, 3, 1, 1);
-	    	grid.add(loging, 2, 1, 1, 1); 
-	    	grid.add(quizlog, 2, 2, 1, 1);
-	    	grid.add(endButton, 2, 3, 1, 1);
-		    	
-	    	dialog.setTitle("이름 입력 창");
-	    	dialog.setHeaderText("채팅 방에서 사용할 이름을 입력하세요");
-	    	dialog.setContentText("이름 : ");
+	    	grid.setHgap(10);	    	
+	    	grid.add(chatlog, 0, 0, 2, 2);	    	
+	    	grid.add(loging, 2, 0, 1, 1); 
+	    	grid.add(quizlog, 2, 1, 1, 1);
+	    	grid.add(chatField, 0, 2, 1, 1);
+	    	grid.add(buttonBar, 2, 2, 1, 1);				// grid in vBox 1211	//button	    		    	
 
-	    	Optional<String> result = dialog.showAndWait();
-	    	if (result.isPresent()){
-	    	    System.out.println("이름 : " + result.get());
-	    	    if(result.get().equals("")) {
-	    	    	userName = "name:익명";
-	    	    	send(userName);
-	    	    }
-	    	    
-	    	    else {
-		    	    userName = "name:" + result.get();
-		    	    send(userName);
-	    	    }
-	    	}
 	    	
+    		userNameField.setOnKeyPressed(e -> {if (e.getCode() == KeyCode.ENTER) {dialogbutton.getOnAction().handle(null);}});
+	    	dialogbutton.setOnAction(new EventHandler<ActionEvent>() {  @Override
+	    	    public void handle(ActionEvent event) {
+	    	    	if( userNameField.getText() != null) {
+	    	    	    System.out.println("이름 : " + userNameField.getText());
+	    	    	    if(userNameField.getText().equals("")) {
+	    	    	    	userName = "name:익명";
+	    	    	    	send(userName);
+	    	    	    }
+	    	    	    else {
+	    		    	    userName = "name:" + userNameField.getText();
+	    		    	    send(userName);
+	    	    	    }
+	    	    	}
+						showSceneChanged(stage,root);
+	    	    }});	    
+	    	
+	    	 
+	    	chatField.setOnKeyPressed(e -> {if (e.getCode() == KeyCode.ENTER) {sendButton.getOnAction().handle(null);}});
 	    	sendButton.setOnAction(new EventHandler<ActionEvent>() {
 	    	    @Override
 	    	    public void handle(ActionEvent event) {
@@ -120,64 +126,46 @@ public class ChatClient extends Application{
 	    	    	chatField.requestFocus();
 	    	    }
 	    	});
-	    	
+	    	stage.setOnCloseRequest(e -> {endButton.getOnAction().handle(null);});
 	    	endButton.setOnAction(new EventHandler<ActionEvent>() {
 	    	    @Override
 	    	    public void handle(ActionEvent event) {
-	    	    	send("quit" + userName);
+	    	    	send("q" + userName);
 	    	    	try{
 	    	    		Thread.sleep(100);
 	    	    	}catch(Exception e){
 	    	    		e.printStackTrace();
 	    	    	}
-	    	    	try {Thread.sleep(50);} catch(Exception e2) {} 
-					Quiz.interrupted();
-					try {Thread.sleep(50);} catch(Exception e2) {} 
-					Timer.interrupted();
 	    	    	stopClient();
-	    	    	stage.hide();
+    	    	stage.hide();
 	    	    }
-	    	});
+	    	});	
 	    	
-	    	chatField.setOnKeyPressed(new EventHandler<KeyEvent>() {
-		    		@Override
-		    		public void handle(KeyEvent event) {
-		    			if(event.getCode() == KeyCode.ENTER) {
-			    			send(chatField.getText());
-			    	    	chatField.setText("");
-			    	    	chatField.requestFocus();
-		    			}
-		    		}
-	    	});
 	    	
-	    	stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-	            public void handle(WindowEvent we) {
-	            	send("quit" + userName);
-	    	    	try{
-	    	    		Thread.sleep(100);
-	    	    	}catch(Exception e){
-	    	    		e.printStackTrace();
-	    	    	}
-	    	    	stopClient();
-	    	    	stage.hide();
-	            }
-	    	});
-	    	
-	    	ObservableList<Node> list = root.getChildren();
-	    	list.add(rootMessage);
-	    	
-	    	list.add(grid);
-		    	//list.add(grid2);
-		    	Scene scene = new Scene(root, 500, 500);
-	
-	    	stage.setTitle("채팅창");
+	    	Scene scene = new Scene(preRoot, 320, 240);
+	    	stage.setTitle("접속 창");
+	    	scene.getStylesheets().clear();
+	    	scene.getStylesheets().add(getClass().getResource("./login.css").toExternalForm());
+
 	    	stage.setScene(scene);
 	    	stage.show();	
+	    	
     	
     	} catch(Exception e) {
     		System.out.println(e);
     	}
 	}
+	private void showSceneChanged(Stage stage,Parent nextRoot) { 
+    	stage.hide();
+ 
+    	scene = new Scene(nextRoot, 780, 600);
+    	stage.setTitle("채팅창");
+    	scene.getStylesheets().clear();
+    	scene.getStylesheets().add(getClass().getResource("./chatRoom.css").toExternalForm());
+    	stage.setScene(scene); 
+    	
+    	stage.show();
+    } 
 	
 	static class Quiz extends Thread{
 		public static void startQuiz(String temp) {
