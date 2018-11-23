@@ -1,0 +1,7 @@
+
+#chatvbox { 
+	-fx-background-repeat : no-repeat ;
+	-fx-background-position : center;
+	-fx-background-image: url("chatRoom.jpg");
+	-fx-background-size : cover;
+}
