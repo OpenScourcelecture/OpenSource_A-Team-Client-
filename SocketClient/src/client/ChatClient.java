@@ -47,9 +47,9 @@ public class ChatClient extends Application{
 	static String chatLogtemp = "";
 	
 	Scene scene;
-	static Label userNameLabel = new Label("À¯Àú ÀÌ¸§");
+	static Label userNameLabel = new Label("ìœ ì € ì´ë¦„");
 	static TextField userNameField = new TextField();
-	static Button dialogbutton = new Button("Á¢¼Ó");
+	static Button dialogbutton = new Button("ì ‘ì†");
 	HBox preRoot = new HBox(3.,userNameLabel,userNameField,dialogbutton);
 	static TextArea rootMessage = new TextArea();
    	
@@ -59,14 +59,14 @@ public class ChatClient extends Application{
 	static TextField timerField = new TextField();
 	HBox serverBar = new HBox(3.,ipField,portField,timerField);
 	
-   	Button sendButton = new Button("Àü ¼Û");
-   	Button endButton = new Button("Á¢ ¼Ó ÇÏ ±â");
+   	Button sendButton = new Button("ì „ ì†¡");
+   	Button endButton = new Button("ì ‘ ì† í•˜ ê¸°");
    	HBox buttonBar = new HBox(2. ,sendButton,endButton);	
 
    	static TextArea chatlog = new TextArea();
    	static TextField chatField = new TextField();
-   	static TextArea loging = new TextArea("Á¢¼Ó ÁßÀÎ »ç¶÷\n------------\n");
-   	static TextArea quizlog = new TextArea("ÄûÁî ¸ñ·Ï\n--------\n");
+   	static TextArea loging = new TextArea("ì ‘ì† ì¤‘ì¸ ì‚¬ëŒ\n------------\n");
+   	static TextArea quizlog = new TextArea("í€´ì¦ˆ ëª©ë¡\n--------\n");
    	GridPane grid = new GridPane();
    	
 	VBox root = new VBox(3.,rootMessage,serverBar,grid);
@@ -81,8 +81,8 @@ public class ChatClient extends Application{
 	   	try {	   		
     		root.setId("chatvbox");
 	   		
-		   	root.setPadding(new Insets(10)); // ¾ÈÂÊ ¿©¹é ¼³Á¤
-		   	root.setSpacing(10); // ÄÁÆ®·Ñ °£ÀÇ ¼öÆò °£°İ ¼³Á¤
+		   	root.setPadding(new Insets(10)); // ì•ˆìª½ ì—¬ë°± ì„¤ì •
+		   	root.setSpacing(10); // ì»¨íŠ¸ë¡¤ ê°„ì˜ ìˆ˜í‰ ê°„ê²© ì„¤ì •
 		   	
 			rootMessage.setEditable(false);										//textArea in vBox
 	    	rootMessage.prefWidthProperty().bind(stage.widthProperty());
@@ -117,10 +117,10 @@ public class ChatClient extends Application{
 	    	grid.add(chatField, 0, 2, 1, 1);
 	    	grid.add(buttonBar, 2, 2, 1, 1);
 		    	
-	    	dialog.setTitle("ÀÌ¸§ ÀÔ·Â Ã¢");
+	    	dialog.setTitle("ì´ë¦„ ì…ë ¥ ì°½");
 	    	dialog.setHeaderText(null);
 	    	dialog.setContentText(null);
-	    	dialog.setContentText("ÀÌ¸§ : ");
+	    	dialog.setContentText("ì´ë¦„ : ");
 
 	    	ButtonType okButton = new ButtonType("OK", ButtonData.OK_DONE);
 	    	dialog.getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
@@ -131,7 +131,7 @@ public class ChatClient extends Application{
 	    	TextField portField2 = new TextField();
 	    	portField2.setText("8888");
 	    	TextField nameField2 = new TextField();
-	    	nameField2.setText("ÀÍ¸í");
+	    	nameField2.setText("ìµëª…");
 	    	
 	    	Label IP = new Label("IP : ");
 	    	IP.setMinWidth(80);
@@ -139,7 +139,7 @@ public class ChatClient extends Application{
 	    	Label PORT = new Label("PORT : ");
 	    	PORT.setMinWidth(80);
 	    	PORT.setTextFill(Color.web("#FFFFFF"));
-	    	Label NAME = new Label("PORT : ");
+	    	Label NAME = new Label("NAME : ");
 	    	NAME.setMinWidth(80);
 	    	NAME.setTextFill(Color.web("#FFFFFF"));
 	    	
@@ -196,12 +196,12 @@ public class ChatClient extends Application{
 	    	
 	    	stage.setOnCloseRequest(e -> {endButton.getOnAction().handle(null);});
 	    	endButton.setOnAction(event -> {
-	    	    	if(endButton.getText().equals("Á¢ ¼Ó ÇÏ ±â")) {
+	    	    	if(endButton.getText().equals("ì ‘ ì† í•˜ ê¸°")) {
 	    	    		startClient(ipField.getText(), Integer.parseInt(portField.getText()));
 	    	    		Platform.runLater(() -> {
-	    	    			chatlog.appendText("[ Ã¤ÆÃ¹æ Á¢¼Ó ]\n");
+	    	    			chatlog.appendText("[ ì±„íŒ…ë°© ì ‘ì† ]\n");
 	    	    		});
-	    	    		endButton.setText("Á¾ ·á ÇÏ ±â");
+	    	    		endButton.setText("ì¢… ë£Œ í•˜ ê¸°");
 	    	    		try {Thread.sleep(200);} catch(Exception e2) {} 
 	    	    		send(userName);
 	    	    	}
@@ -232,7 +232,7 @@ public class ChatClient extends Application{
     	stage.hide();
  
     	scene = new Scene(nextRoot, 780, 600);
-    	stage.setTitle("Ã¤ÆÃÃ¢");
+    	stage.setTitle("ì±„íŒ…ì°½");
     	scene.getStylesheets().clear();
     	scene.getStylesheets().add(getClass().getResource("./chatRoom.css").toExternalForm());
     	stage.setScene(scene); 
@@ -258,8 +258,8 @@ public class ChatClient extends Application{
 						if(count == 6) {
 							count = 0;
 							timerField.setText("");
-							System.out.println("Á¤´ä : " + correctResult + ", ¿À´ä : " + incorrectResult);
-							send("userResultÁ¤´ä : " + correctResult + ", ¿À´ä : " + incorrectResult);
+							System.out.println("ì •ë‹µ : " + correctResult + ", ì˜¤ë‹µ : " + incorrectResult);
+							send("userResultì •ë‹µ : " + correctResult + ", ì˜¤ë‹µ : " + incorrectResult);
 							correctResult = 0;
 							incorrectResult = 0;
 							chatlog.setText(chatLogtemp);
@@ -270,7 +270,7 @@ public class ChatClient extends Application{
 						
 						try {sleep(100);} catch(Exception e) {}
 						if(!temp.equals(userResult)) { incorrectResult++; userResult = ""; }
-						send("´ÙÀ½");
+						send("ë‹¤ìŒ");
 					} catch (Exception e) {
 						try {sleep(50);} catch(Exception e2) {} 
 						Quiz.interrupted();
@@ -289,7 +289,7 @@ public class ChatClient extends Application{
 					int second = 5;
 					while(second >= 0) {						
 						try {
-							timerField.setText(" " + Integer.toString(second) + "ÃÊ");
+							timerField.setText(" " + Integer.toString(second) + "ì´ˆ");
 							second--;
 							sleep(1000);
 						} catch (Exception e) {
@@ -351,22 +351,22 @@ public class ChatClient extends Application{
 							Quiz.startQuiz(result);
 						}
 						
-						else if(message.length() >= 3 && message.substring(0, 3).equals("m´ä:")) {
+						else if(message.length() >= 3 && message.substring(0, 3).equals("më‹µ:")) {
 							System.out.println(message.substring(3));
 							userResult = message.substring(3);
 							if(mark(message.substring(3))) {
-								send("Á¤´äÀÔ´Ï´Ù.\n");
+								send("ì •ë‹µì…ë‹ˆë‹¤.\n");
 							}
 							
 							else {
-								send("¿À´äÀÔ´Ï´Ù.\n");
+								send("ì˜¤ë‹µì…ë‹ˆë‹¤.\n");
 							}
 							
 						}
 						
 						
 						else if(message.length() >= 7 && message.substring(0, 7).equals("mDBquiz")) {
-							quizlog.setText("ÄûÁî ¸ñ·Ï\n--------\n");
+							quizlog.setText("í€´ì¦ˆ ëª©ë¡\n--------\n");
 							quizlog.appendText(message.substring(7));
 						}
 						
@@ -425,7 +425,7 @@ public class ChatClient extends Application{
 				} catch (Exception e) {
 					if(!socket.isClosed()) {
 					stopClient();
-					System.out.println("[¼­¹ö Á¢¼Ó ½ÇÆĞ]");
+					System.out.println("[ì„œë²„ ì ‘ì† ì‹¤íŒ¨]");
 					Platform.exit();
 					}
 				}
