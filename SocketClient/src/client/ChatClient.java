@@ -15,15 +15,32 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Callback;
+import javafx.util.Pair;
+
+class setData{
+	private String ip;
+	private String port;
+	private String name;
+	
+	public setData(String ip, String port, String name) {
+		this.ip = ip;
+		this.port = port;
+		this.name = name;
+	}
+}
 
 public class ChatClient extends Application{
 	static Socket socket;
 	static HashMap<Integer, String> quizDB = new HashMap<Integer, String>();
+	static ArrayList<setData> setdata = new ArrayList<setData>();
 	static String result = "";
 	static int count = 0; static int correctResult = 0; static int incorrectResult = 0;
 	static String userResult = "";
@@ -43,7 +60,7 @@ public class ChatClient extends Application{
 	HBox serverBar = new HBox(3.,ipField,portField,timerField);
 	
    	Button sendButton = new Button("전 송");
-   	Button endButton = new Button("나 가 기");
+   	Button endButton = new Button("접 속 하 기");
    	HBox buttonBar = new HBox(2. ,sendButton,endButton);	
 
    	static TextArea chatlog = new TextArea();
@@ -55,28 +72,30 @@ public class ChatClient extends Application{
 	VBox root = new VBox(3.,rootMessage,serverBar,grid);
  
   	static String userName = null;
-
+   	static Dialog<setData> dialog = new Dialog<>();
+   	static String serverIP = null;
+   	static String serverPort = null;
+	
 	@Override
 	public void start(Stage stage) {
-	   	try {
-    		preRoot.setId("loginhbox");			//set css seleter for tag
+	   	try {	   		
     		root.setId("chatvbox");
-    		userNameLabel.setId("loginlabel");
 	   		
-	   		preRoot.setAlignment(Pos.CENTER);;
-	   	    
-    		root.setPadding(new Insets(10));					 // set inner space
-    		root.setSpacing(10); 								// set space each other in VBox 
-		   	rootMessage.setEditable(false);										//textArea in vBox
+		   	root.setPadding(new Insets(10)); // 안쪽 여백 설정
+		   	root.setSpacing(10); // 컨트롤 간의 수평 간격 설정
+		   	
+			rootMessage.setEditable(false);										//textArea in vBox
 	    	rootMessage.prefWidthProperty().bind(stage.widthProperty());
 	   
 	    	chatlog.setEditable(false);
 	    	chatlog.setWrapText(true); 	    	
 	    	chatlog.prefWidthProperty().bind(stage.widthProperty());			// grid in vBOx 0022  //textArea
-	    	chatlog.prefHeightProperty().bind(stage.heightProperty());	    	
+	    	chatlog.prefHeightProperty().bind(stage.heightProperty());	
+	    	
 	    	loging.setEditable(false);											// grid in vBOx 2011	//textArea
 	    	loging.prefWidthProperty().bind(stage.widthProperty());
-	    	loging.prefHeightProperty().bind(stage.heightProperty());    	
+	    	loging.prefHeightProperty().bind(stage.heightProperty());  
+	    	
 	    	quizlog.setEditable(false);											// grid in vBox 2111	//textArea
 	    	quizlog.prefWidthProperty().bind(stage.widthProperty());
 	    	quizlog.prefHeightProperty().bind(stage.heightProperty());
@@ -89,34 +108,82 @@ public class ChatClient extends Application{
 	    	timerField.prefWidthProperty().bind(serverBar.widthProperty());
 	    	ipField.prefWidthProperty().bind(serverBar.widthProperty());
 	    	portField.prefWidthProperty().bind(serverBar.widthProperty());
-	    		
+	
 	    	grid.setVgap(10);
 	    	grid.setHgap(10);	    	
 	    	grid.add(chatlog, 0, 0, 2, 2);	    	
 	    	grid.add(loging, 2, 0, 1, 1); 
 	    	grid.add(quizlog, 2, 1, 1, 1);
 	    	grid.add(chatField, 0, 2, 1, 1);
-	    	grid.add(buttonBar, 2, 2, 1, 1);				// grid in vBox 1211	//button	    		    	
+	    	grid.add(buttonBar, 2, 2, 1, 1);
+		    	
+	    	dialog.setTitle("이름 입력 창");
+	    	dialog.setHeaderText(null);
+	    	dialog.setContentText(null);
+	    	dialog.setContentText("이름 : ");
 
+	    	ButtonType okButton = new ButtonType("OK", ButtonData.OK_DONE);
+	    	dialog.getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
 	    	
-    		userNameField.setOnKeyPressed(e -> {if (e.getCode() == KeyCode.ENTER) {dialogbutton.getOnAction().handle(null);}});
-	    	dialogbutton.setOnAction(new EventHandler<ActionEvent>() {  @Override
-	    	    public void handle(ActionEvent event) {
-	    	    	if( userNameField.getText() != null) {
-	    	    	    System.out.println("이름 : " + userNameField.getText());
-	    	    	    if(userNameField.getText().equals("")) {
-	    	    	    	userName = "name:익명";
-	    	    	    	send(userName);
-	    	    	    }
-	    	    	    else {
-	    		    	    userName = "name:" + userNameField.getText();
-	    		    	    send(userName);
-	    	    	    }
-	    	    	}
-						showSceneChanged(stage,root);
-	    	    }});	    
 	    	
-	    	 
+	    	TextField ipField2 = new TextField();
+	    	ipField2.setText("192.168.0.13");
+	    	TextField portField2 = new TextField();
+	    	portField2.setText("8888");
+	    	TextField nameField2 = new TextField();
+	    	nameField2.setText("익명");
+	    	
+	    	Label IP = new Label("IP : ");
+	    	IP.setMinWidth(80);
+	    	IP.setTextFill(Color.web("#FFFFFF"));
+	    	Label PORT = new Label("PORT : ");
+	    	PORT.setMinWidth(80);
+	    	PORT.setTextFill(Color.web("#FFFFFF"));
+	    	Label NAME = new Label("PORT : ");
+	    	NAME.setMinWidth(80);
+	    	NAME.setTextFill(Color.web("#FFFFFF"));
+	    	
+	    	HBox IP_text = new HBox(2., IP, ipField2);
+	    	IP_text.setAlignment(Pos.CENTER);
+	    	HBox PORT_text = new HBox(2., PORT, portField2);
+	    	PORT_text.setAlignment(Pos.CENTER);
+	    	HBox NAME_text = new HBox(2., NAME, nameField2);
+	    	NAME_text.setAlignment(Pos.CENTER);
+	    	VBox dialogPane = new VBox(3.,IP_text, PORT_text, NAME_text);
+	    	
+	    	dialogPane.setId("dialogPane");   	
+	    	dialogPane.setPadding(new Insets(10, 10, 10, 10));
+	    	dialogPane.setSpacing(15);
+	    	
+	    	dialogPane.setPrefWidth(400);
+	    	dialogPane.setPrefHeight(200);
+	    	dialog.getDialogPane().setContent(dialogPane);
+	    	dialogPane.getStylesheets().clear();
+	    	dialogPane.getStylesheets().add(getClass().getResource("./login.css").toExternalForm());
+	    	dialogPane.setAlignment(Pos.CENTER);
+	    	dialog.setResultConverter(new Callback<ButtonType, setData>() {	
+				@Override
+				public setData call(ButtonType ok) {					
+					if(ok == okButton) {
+						return new setData(ipField2.getText(), portField2.getText(), nameField2.getText());
+					}
+		    		
+					return null;
+				}
+	    	});
+	    	
+	    	Optional<setData> result = dialog.showAndWait();
+	    	if(result.isPresent()) {
+	    		System.out.println(ipField2.getText() + " " + nameField2.getText() + " " + portField2.getText());
+	    		
+	    		serverIP = ipField2.getText();
+	    		ipField.setText(ipField2.getText());
+	    		serverPort = portField2.getText();
+	    		portField.setText(portField2.getText());
+	    		userName = "name:" + nameField2.getText();
+	    		showSceneChanged(stage, root);
+	    	}
+	    	
 	    	chatField.setOnKeyPressed(e -> {if (e.getCode() == KeyCode.ENTER) {sendButton.getOnAction().handle(null);}});
 	    	sendButton.setOnAction(new EventHandler<ActionEvent>() {
 	    	    @Override
@@ -126,36 +193,42 @@ public class ChatClient extends Application{
 	    	    	chatField.requestFocus();
 	    	    }
 	    	});
+	    	
 	    	stage.setOnCloseRequest(e -> {endButton.getOnAction().handle(null);});
-	    	endButton.setOnAction(new EventHandler<ActionEvent>() {
-	    	    @Override
-	    	    public void handle(ActionEvent event) {
-	    	    	send("q" + userName);
-	    	    	try{
-	    	    		Thread.sleep(100);
-	    	    	}catch(Exception e){
-	    	    		e.printStackTrace();
+	    	endButton.setOnAction(event -> {
+	    	    	if(endButton.getText().equals("접 속 하 기")) {
+	    	    		startClient(ipField.getText(), Integer.parseInt(portField.getText()));
+	    	    		Platform.runLater(() -> {
+	    	    			chatlog.appendText("[ 채팅방 접속 ]\n");
+	    	    		});
+	    	    		endButton.setText("종 료 하 기");
+	    	    		try {Thread.sleep(200);} catch(Exception e2) {} 
+	    	    		send(userName);
 	    	    	}
-	    	    	stopClient();
-    	    	stage.hide();
-	    	    }
+	    	    	
+	    	    	else {
+		    	    	send("quit" + userName);
+		    	    	try{
+		    	    		Thread.sleep(100);
+		    	    	}catch(Exception e){
+		    	    		e.printStackTrace();
+		    	    	}
+		    	    	try {Thread.sleep(50);} catch(Exception e2) {} 
+						Quiz.interrupted();
+						try {Thread.sleep(50);} catch(Exception e2) {} 
+						Timer.interrupted();
+		    	    	stopClient();
+		    	    	stage.hide();
+	    	    	}
 	    	});	
-	    	
-	    	
-	    	Scene scene = new Scene(preRoot, 320, 240);
-	    	stage.setTitle("접속 창");
-	    	scene.getStylesheets().clear();
-	    	scene.getStylesheets().add(getClass().getResource("./login.css").toExternalForm());
-
-	    	stage.setScene(scene);
-	    	stage.show();	
-	    	
     	
     	} catch(Exception e) {
     		System.out.println(e);
     	}
+	   	
 	}
-	private void showSceneChanged(Stage stage,Parent nextRoot) { 
+	
+	private void showSceneChanged(Stage stage, Parent nextRoot) { 
     	stage.hide();
  
     	scene = new Scene(nextRoot, 780, 600);
@@ -297,8 +370,8 @@ public class ChatClient extends Application{
 							quizlog.appendText(message.substring(7));
 						}
 						
-						else if(message.length() >= 9 && message.substring(0, 9).equals("userResult")) {
-							chatlog.appendText(message.substring(9));
+						else if(message.length() >= 10 && message.substring(0, 10).equals("userResult")) {
+							chatlog.appendText(message.substring(10));
 						}
 						
 						else
@@ -348,9 +421,6 @@ public class ChatClient extends Application{
 			public void run() {
 				try {
 					socket = new Socket(IP, port);
-					System.out.println("[서버 접속 성공]");
-					chatlog.appendText("[서버 접속 성공]" + "\n");
-	    	    	chatField.requestFocus();
 					receive();
 				} catch (Exception e) {
 					if(!socket.isClosed()) {
@@ -365,7 +435,6 @@ public class ChatClient extends Application{
 	}
 	
 	public static void main(String[] args) {
-		startClient("192.168.43.206", 8888);
 		launch(args);
 	}
 }
