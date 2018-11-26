@@ -47,12 +47,8 @@ public class ChatClient extends Application{
 	static String chatLogtemp = "";
 	
 	Scene scene;
-	static Label userNameLabel = new Label("유저 이름");
-	static TextField userNameField = new TextField();
-	static Button dialogbutton = new Button("접속");
-	HBox preRoot = new HBox(3.,userNameLabel,userNameField,dialogbutton);
+	
 	static TextArea rootMessage = new TextArea();
-   	
    	
 	static TextField ipField = new TextField();
 	static TextField portField = new TextField();
@@ -60,7 +56,7 @@ public class ChatClient extends Application{
 	HBox serverBar = new HBox(3.,ipField,portField,timerField);
 	
    	Button sendButton = new Button("전 송");
-   	Button endButton = new Button("접 속 하 기");
+   	Button endButton = new Button("나 가 기");
    	HBox buttonBar = new HBox(2. ,sendButton,endButton);	
 
    	static TextArea chatlog = new TextArea();
@@ -78,163 +74,97 @@ public class ChatClient extends Application{
 	
 	@Override
 	public void start(Stage stage) {
-	   	try {	   		
-    		root.setId("chatvbox");
-	   		
-		   	root.setPadding(new Insets(10)); // 안쪽 여백 설정
-		   	root.setSpacing(10); // 컨트롤 간의 수평 간격 설정
-		   	
-			rootMessage.setEditable(false);										//textArea in vBox
-	    	rootMessage.prefWidthProperty().bind(stage.widthProperty());
-	   
-	    	chatlog.setEditable(false);
-	    	chatlog.setWrapText(true); 	    	
-	    	chatlog.prefWidthProperty().bind(stage.widthProperty());			// grid in vBOx 0022  //textArea
-	    	chatlog.prefHeightProperty().bind(stage.heightProperty());	
-	    	
-	    	loging.setEditable(false);											// grid in vBOx 2011	//textArea
-	    	loging.prefWidthProperty().bind(stage.widthProperty());
-	    	loging.prefHeightProperty().bind(stage.heightProperty());  
-	    	
-	    	quizlog.setEditable(false);											// grid in vBox 2111	//textArea
-	    	quizlog.prefWidthProperty().bind(stage.widthProperty());
-	    	quizlog.prefHeightProperty().bind(stage.heightProperty());
-		    
-	    	chatField.prefWidthProperty().bind(stage.widthProperty());			// grid in vBox 0211	//textfield
-	    	sendButton.prefWidthProperty().bind(buttonBar.widthProperty());
-	    	endButton.prefWidthProperty().bind(buttonBar.widthProperty());    
-	    	
-	    	timerField.setEditable(false);
-	    	timerField.prefWidthProperty().bind(serverBar.widthProperty());
-	    	ipField.prefWidthProperty().bind(serverBar.widthProperty());
-	    	portField.prefWidthProperty().bind(serverBar.widthProperty());
-	
-	    	grid.setVgap(10);
-	    	grid.setHgap(10);	    	
-	    	grid.add(chatlog, 0, 0, 2, 2);	    	
-	    	grid.add(loging, 2, 0, 1, 1); 
-	    	grid.add(quizlog, 2, 1, 1, 1);
-	    	grid.add(chatField, 0, 2, 1, 1);
-	    	grid.add(buttonBar, 2, 2, 1, 1);
-		    	
-	    	dialog.setTitle("이름 입력 창");
-	    	dialog.setHeaderText(null);
-	    	dialog.setContentText(null);
-	    	dialog.setContentText("이름 : ");
+	   try {	   			   		
+		rootMessage.setEditable(false);										
+		chatlog.setEditable(false);
+		loging.setEditable(false);											
+	 	quizlog.setEditable(false);	
+	    	ipField.setEditable(false);
+		portField.setEditable(false);
+		timerField.setEditable(false);
 
-	    	ButtonType okButton = new ButtonType("OK", ButtonData.OK_DONE);
-	    	dialog.getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
+		loging.prefHeightProperty().bind(stage.heightProperty());  
+		quizlog.prefHeightProperty().bind(stage.heightProperty());
+		chatField.prefWidthProperty().bind(stage.widthProperty());			
+
+		sendButton.prefWidthProperty().bind(buttonBar.widthProperty());
+		endButton.prefWidthProperty().bind(buttonBar.widthProperty());    
+		timerField.prefWidthProperty().bind(serverBar.widthProperty());
+		ipField.prefWidthProperty().bind(serverBar.widthProperty());
+		portField.prefWidthProperty().bind(serverBar.widthProperty());
+
+		grid.add(chatlog, 0, 0, 2, 2);	    	
+		grid.add(loging, 2, 0, 1, 1); 
+		grid.add(quizlog, 2, 1, 1, 1);
+		grid.add(chatField, 0, 2, 1, 1);
+		grid.add(buttonBar, 2, 2, 1, 1);
+
+		dialog.setTitle("Welcome Quiz-chat");
+		TextField ipField2 = new TextField("192.168.0.13");
+		TextField portField2 = new TextField("8888");
+		TextField nameField2 = new TextField("익명");
+
+		VBox dialogPane = new VBox(3.,new HBox(2., new Label("IP : "), ipField2),
+				new HBox(2., new Label("PORT : "), portField2), 
+				new HBox(2., new Label("NAME : "), nameField2));
+
+		ButtonType okButton = new ButtonType("OK", ButtonData.OK_DONE);
+		dialog.getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
+		dialog.getDialogPane().setContent(dialogPane);
+		dialogPane.getStylesheets().add(getClass().getResource("./login.css").toExternalForm());
+
 	    	
-	    	
-	    	TextField ipField2 = new TextField();
-	    	ipField2.setText("192.168.0.13");
-	    	TextField portField2 = new TextField();
-	    	portField2.setText("8888");
-	    	TextField nameField2 = new TextField();
-	    	nameField2.setText("익명");
-	    	
-	    	Label IP = new Label("IP : ");
-	    	IP.setMinWidth(80);
-	    	IP.setTextFill(Color.web("#FFFFFF"));
-	    	Label PORT = new Label("PORT : ");
-	    	PORT.setMinWidth(80);
-	    	PORT.setTextFill(Color.web("#FFFFFF"));
-	    	Label NAME = new Label("NAME : ");
-	    	NAME.setMinWidth(80);
-	    	NAME.setTextFill(Color.web("#FFFFFF"));
-	    	
-	    	HBox IP_text = new HBox(2., IP, ipField2);
-	    	IP_text.setAlignment(Pos.CENTER);
-	    	HBox PORT_text = new HBox(2., PORT, portField2);
-	    	PORT_text.setAlignment(Pos.CENTER);
-	    	HBox NAME_text = new HBox(2., NAME, nameField2);
-	    	NAME_text.setAlignment(Pos.CENTER);
-	    	VBox dialogPane = new VBox(3.,IP_text, PORT_text, NAME_text);
-	    	
-	    	dialogPane.setId("dialogPane");   	
-	    	dialogPane.setPadding(new Insets(10, 10, 10, 10));
-	    	dialogPane.setSpacing(15);
-	    	
-	    	dialogPane.setPrefWidth(400);
-	    	dialogPane.setPrefHeight(200);
-	    	dialog.getDialogPane().setContent(dialogPane);
-	    	dialogPane.getStylesheets().clear();
-	    	dialogPane.getStylesheets().add(getClass().getResource("./login.css").toExternalForm());
-	    	dialogPane.setAlignment(Pos.CENTER);
-	    	dialog.setResultConverter(new Callback<ButtonType, setData>() {	
-				@Override
-				public setData call(ButtonType ok) {					
-					if(ok == okButton) {
-						return new setData(ipField2.getText(), portField2.getText(), nameField2.getText());
-					}
-		    		
-					return null;
+		dialog.setResultConverter(new Callback<ButtonType, setData>() {	
+			@Override
+			public setData call(ButtonType ok) {					
+				if(ok == okButton) 
+					return new setData(ipField2.getText(), portField2.getText(), nameField2.getText());		    		
+				return null;
 				}
-	    	});
+			});
 	    	
-	    	Optional<setData> result = dialog.showAndWait();
-	    	if(result.isPresent()) {
-	    		System.out.println(ipField2.getText() + " " + nameField2.getText() + " " + portField2.getText());
-	    		
-	    		serverIP = ipField2.getText();
-	    		ipField.setText(ipField2.getText());
-	    		serverPort = portField2.getText();
-	    		portField.setText(portField2.getText());
-	    		userName = "name:" + nameField2.getText();
-	    		showSceneChanged(stage, root);
-	    	}
+		Optional<setData> result = dialog.showAndWait();
+		if(result.isPresent()) {
+			ipField.setText(serverIP = ipField2.getText());
+			portField.setText(serverPort = portField2.getText());
+			userName = "name:" + nameField2.getText();
+			System.out.println(serverIP + " " + userName + " " +serverPort);
+			
+			showSceneChanged(stage, root, "./chatRoom.css");
+			}
 	    	
-	    	chatField.setOnKeyPressed(e -> {if (e.getCode() == KeyCode.ENTER) {sendButton.getOnAction().handle(null);}});
-	    	sendButton.setOnAction(new EventHandler<ActionEvent>() {
-	    	    @Override
-	    	    public void handle(ActionEvent event) {
-	    	    	send(chatField.getText());
-	    	    	chatField.setText("");
-	    	    	chatField.requestFocus();
-	    	    }
-	    	});
+		chatField.setOnKeyPressed(e -> {if (e.getCode() == KeyCode.ENTER) {sendButton.getOnAction().handle(null);}});
+		sendButton.setOnAction(new EventHandler<ActionEvent>() {
+		    @Override
+		    public void handle(ActionEvent event) {
+			send(chatField.getText());
+			chatField.setText("");
+			chatField.requestFocus();
+		    }
+		});
 	    	
-	    	stage.setOnCloseRequest(e -> {endButton.getOnAction().handle(null);});
-	    	endButton.setOnAction(event -> {
-	    	    	if(endButton.getText().equals("접 속 하 기")) {
-	    	    		startClient(ipField.getText(), Integer.parseInt(portField.getText()));
-	    	    		Platform.runLater(() -> {
-	    	    			chatlog.appendText("[ 채팅방 접속 ]\n");
-	    	    		});
-	    	    		endButton.setText("종 료 하 기");
-	    	    		try {Thread.sleep(200);} catch(Exception e2) {} 
-	    	    		send(userName);
-	    	    	}
-	    	    	
-	    	    	else {
-		    	    	send("quit" + userName);
-		    	    	try{
-		    	    		Thread.sleep(100);
-		    	    	}catch(Exception e){
-		    	    		e.printStackTrace();
-		    	    	}
-		    	    	try {Thread.sleep(50);} catch(Exception e2) {} 
-						Quiz.interrupted();
-						try {Thread.sleep(50);} catch(Exception e2) {} 
-						Timer.interrupted();
-		    	    	stopClient();
-		    	    	stage.hide();
-	    	    	}
-	    	});	
-    	
-    	} catch(Exception e) {
-    		System.out.println(e);
-    	}
-	   	
+		stage.setOnCloseRequest(e -> {endButton.getOnAction().handle(null);});
+		endButton.setOnAction(event -> {						//endButton check delete
+			send("quit" + userName);
+			try{Thread.sleep(150);}catch(Exception e){e.printStackTrace();} 	// sleep(150) <- (100)(50)
+			Quiz.interrupted();
+			try {Thread.sleep(50);} catch(Exception e2) {} 
+			Timer.interrupted();
+			stopClient();
+			stage.close();														// stage.close() <- stage.hide() 
+		});	
+	   } catch(Exception e) {
+		   System.out.println(e);
+	   }	   	
 	}
 	
-	private void showSceneChanged(Stage stage, Parent nextRoot) { 
+	private void showSceneChanged(Stage stage, Parent nextRoot, String CSSfilelocation) { 
     	stage.hide();
  
     	scene = new Scene(nextRoot, 780, 600);
     	stage.setTitle("채팅창");
     	scene.getStylesheets().clear();
-    	scene.getStylesheets().add(getClass().getResource("./chatRoom.css").toExternalForm());
+    	scene.getStylesheets().add(getClass().getResource(CSSfilelocation).toExternalForm());
     	stage.setScene(scene); 
     	
     	stage.show();
