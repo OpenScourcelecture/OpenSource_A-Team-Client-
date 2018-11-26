@@ -1,14 +1,39 @@
 
-.root { 
+VBox {
+	-fx-opacity: 0.75;
 	-fx-background-repeat : no-repeat ;
 	-fx-background-position : center;
-	-fx-background-image: url("login.jpg");
+	-fx-background-image: url("login.jpg");	
 	-fx-background-size : cover;
-	-fx-background-color: #c0c0c0;
-	-fx-opacity: 0.75;
-	}
-#loginlabel{
-	-fx-font-size : 18px;
+	-fx-alignment : center ;
+    -fx-padding: 80 1 80 1 ;
+    -fx-spacing: 10;
+}
+
+HBox{
+    -fx-padding: 1 100 1 80;
+    -fx-spacing: 10;
+    -fx-alignment : center-right ;
+    -fx-background-radius: 1.0;
+    
+}
+TextField{
+	-fx-opacity: 0.88;
+	-fx-font-size : 14px;
+	-fx-text-fill: black;
+}
+TextField:focused{
+	-fx-border-color : #32cd32;
+	-fx-border-insets : 0.01px;
+	-fx-border-width : 0.5px;
+	-fx-border-radius : 5;
+}
+
+Label{
+	-fx-visibility: visible;
+	-fx-font-family : "monospace";	
+	-fx-font-size : 20px;
 	-fx-text-fill: #ffffff;
-    -fx-effect: dropshadow( gaussian , rgba(255,255,255,0.5) , 0,0,0,1 );
+    -fx-effect: dropshadow( gaussian  , rgba(189,189,189,0.8) , 0,0,2,2 );
+	-fx-font-weight : 600;
 }
