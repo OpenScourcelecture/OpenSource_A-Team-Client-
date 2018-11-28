@@ -44,28 +44,32 @@ public class ChatClient extends Application{
 	static String result = "";
 	static int count = 0; static int correctResult = 0; static int incorrectResult = 0;
 	static String userResult = "";
+	static String userResultLog = "";
 	static String chatLogtemp = "";
 	
 	Scene scene;
-	
-	static TextArea rootMessage = new TextArea();
+	static Label userNameLabel = new Label("¿Ø¿˙ ¿Ã∏ß");
+	static TextField userNameField = new TextField();
+	static Button dialogbutton = new Button("¡¢º”");
+	HBox preRoot = new HBox(3.,userNameLabel,userNameField,dialogbutton);
+   	
    	
 	static TextField ipField = new TextField();
 	static TextField portField = new TextField();
 	static TextField timerField = new TextField();
 	HBox serverBar = new HBox(3.,ipField,portField,timerField);
 	
-   	Button sendButton = new Button("Ï†Ñ ÏÜ°");
-   	Button endButton = new Button("ÎÇò Í∞Ä Í∏∞");
+   	Button sendButton = new Button("¿¸ º€");
+   	Button endButton = new Button("¡¢ º” «œ ±‚");
    	HBox buttonBar = new HBox(2. ,sendButton,endButton);	
 
    	static TextArea chatlog = new TextArea();
    	static TextField chatField = new TextField();
-   	static TextArea loging = new TextArea("Ï†ëÏÜç Ï§ëÏù∏ ÏÇ¨Îûå\n------------\n");
-   	static TextArea quizlog = new TextArea("ÌÄ¥Ï¶à Î™©Î°ù\n--------\n");
+   	static TextArea loging = new TextArea("¡¢º” ¡ﬂ¿Œ ªÁ∂˜\n------------\n");
+   	static TextArea quizlog = new TextArea("ƒ˚¡Ó ∏Ò∑œ\n--------\n");
    	GridPane grid = new GridPane();
    	
-	VBox root = new VBox(3.,rootMessage,serverBar,grid);
+	VBox root = new VBox(2.,serverBar,grid);
  
   	static String userName = null;
    	static Dialog<setData> dialog = new Dialog<>();
@@ -74,133 +78,239 @@ public class ChatClient extends Application{
 	
 	@Override
 	public void start(Stage stage) {
-	   try {	   			   		
-		rootMessage.setEditable(false);										
-		chatlog.setEditable(false);
-		loging.setEditable(false);											
-	 	quizlog.setEditable(false);	
+	   	try {	   		
+    		root.setId("chatvbox");
+	   		
+		   	root.setPadding(new Insets(10)); // æ»¬  ø©πÈ º≥¡§
+		   	root.setSpacing(10); // ƒ¡∆Æ∑— ∞£¿« ºˆ∆Ú ∞£∞› º≥¡§
+	   
+		   	chatlog.setOpacity(0.8);
+	    	chatlog.setEditable(false);
+	    	chatlog.setWrapText(true); 	    	
+	    	chatlog.prefWidthProperty().bind(stage.widthProperty());			// grid in vBOx 0022  //textArea
+	    	chatlog.prefHeightProperty().bind(stage.heightProperty());	
+	    	
+	    	loging.setOpacity(0.8);
+	    	loging.setEditable(false);											// grid in vBOx 2011	//textArea
+	    	loging.prefWidthProperty().bind(stage.widthProperty());
+	    	loging.prefHeightProperty().bind(stage.heightProperty());  
+	    	
+	    	quizlog.setOpacity(0.8);
+	    	quizlog.setEditable(false);											// grid in vBox 2111	//textArea
+	    	quizlog.prefWidthProperty().bind(stage.widthProperty());
+	    	quizlog.prefHeightProperty().bind(stage.heightProperty());
+		    
+	    	chatField.setOpacity(0.8);
+	    	chatField.prefWidthProperty().bind(stage.widthProperty());			// grid in vBox 0211	//textfield
+	    	sendButton.prefWidthProperty().bind(buttonBar.widthProperty());
+	    	endButton.prefWidthProperty().bind(buttonBar.widthProperty());    
+	    	
+	    	timerField.setOpacity(0.8);
+	    	timerField.setEditable(false);
+	    	timerField.prefWidthProperty().bind(serverBar.widthProperty());
+	    	ipField.setOpacity(0.8);
+	    	ipField.prefWidthProperty().bind(serverBar.widthProperty());
+	    	portField.setOpacity(0.8);
+	    	portField.prefWidthProperty().bind(serverBar.widthProperty());
+	
+	    	grid.setVgap(10);
+	    	grid.setHgap(10);	    	
+	    	grid.add(chatlog, 0, 0, 2, 2);	    	
+	    	grid.add(loging, 2, 0, 1, 1); 
+	    	grid.add(quizlog, 2, 1, 1, 1);
+	    	grid.add(chatField, 0, 2, 1, 1);
+	    	grid.add(buttonBar, 2, 2, 1, 1);
+		    	
+	    	dialog.setTitle("¿Ã∏ß ¿‘∑¬ √¢");
+	    	dialog.setHeaderText(null);
+	    	dialog.setContentText(null);
+	    	dialog.setContentText("¿Ã∏ß : ");
+
+	    	ButtonType okButton = new ButtonType("OK", ButtonData.OK_DONE);
+	    	dialog.getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
+	    	
 	    	ipField.setEditable(false);
-		portField.setEditable(false);
-		timerField.setEditable(false);
-
-		loging.prefHeightProperty().bind(stage.heightProperty());  
-		quizlog.prefHeightProperty().bind(stage.heightProperty());
-		chatField.prefWidthProperty().bind(stage.widthProperty());			
-
-		sendButton.prefWidthProperty().bind(buttonBar.widthProperty());
-		endButton.prefWidthProperty().bind(buttonBar.widthProperty());    
-		timerField.prefWidthProperty().bind(serverBar.widthProperty());
-		ipField.prefWidthProperty().bind(serverBar.widthProperty());
-		portField.prefWidthProperty().bind(serverBar.widthProperty());
-
-		grid.add(chatlog, 0, 0, 2, 2);	    	
-		grid.add(loging, 2, 0, 1, 1); 
-		grid.add(quizlog, 2, 1, 1, 1);
-		grid.add(chatField, 0, 2, 1, 1);
-		grid.add(buttonBar, 2, 2, 1, 1);
-
-		dialog.setTitle("Welcome Quiz-chat");
-		TextField ipField2 = new TextField("192.168.0.13");
-		TextField portField2 = new TextField("8888");
-		TextField nameField2 = new TextField("ÏùµÎ™Ö");
-
-		VBox dialogPane = new VBox(3.,new HBox(2., new Label("IP : "), ipField2),
-				new HBox(2., new Label("PORT : "), portField2), 
-				new HBox(2., new Label("NAME : "), nameField2));
-
-		ButtonType okButton = new ButtonType("OK", ButtonData.OK_DONE);
-		dialog.getDialogPane().getButtonTypes().addAll(okButton, ButtonType.CANCEL);
-		dialog.getDialogPane().setContent(dialogPane);
-		dialogPane.getStylesheets().add(getClass().getResource("./login.css").toExternalForm());
-
+	    	portField.setEditable(false);
+	    	TextField ipField2 = new TextField();
+	    	ipField2.setText("192.168.0.1");
+	    	TextField portField2 = new TextField();
+	    	portField2.setText("8888");
+	    	TextField nameField2 = new TextField();
+	    	nameField2.setText("¿Õ∏Ì");
 	    	
-		dialog.setResultConverter(new Callback<ButtonType, setData>() {	
-			@Override
-			public setData call(ButtonType ok) {					
-				if(ok == okButton) 
-					return new setData(ipField2.getText(), portField2.getText(), nameField2.getText());		    		
-				return null;
+	    	Label IP = new Label("IP : ");
+	    	IP.setMinWidth(80);
+	    	IP.setTextFill(Color.web("#FFFFFF"));
+	    	Label PORT = new Label("PORT : ");
+	    	PORT.setMinWidth(80);
+	    	PORT.setTextFill(Color.web("#FFFFFF"));
+	    	Label NAME = new Label("NAME : ");
+	    	NAME.setMinWidth(80);
+	    	NAME.setTextFill(Color.web("#FFFFFF"));
+	    	
+	    	HBox IP_text = new HBox(2., IP, ipField2);
+	    	IP_text.setAlignment(Pos.CENTER);
+	    	HBox PORT_text = new HBox(2., PORT, portField2);
+	    	PORT_text.setAlignment(Pos.CENTER);
+	    	HBox NAME_text = new HBox(2., NAME, nameField2);
+	    	NAME_text.setAlignment(Pos.CENTER);
+	    	VBox dialogPane = new VBox(3.,IP_text, PORT_text, NAME_text);
+	    	
+	    	dialogPane.setId("dialogPane");   	
+	    	dialogPane.setPadding(new Insets(10, 10, 10, 10));
+	    	dialogPane.setSpacing(15);
+	    	
+	    	dialogPane.setPrefWidth(400);
+	    	dialogPane.setPrefHeight(200);
+	    	dialog.getDialogPane().setContent(dialogPane);
+	    	dialogPane.getStylesheets().clear();
+	    	dialogPane.getStylesheets().add(getClass().getResource("./login.css").toExternalForm());
+	    	dialogPane.setAlignment(Pos.CENTER);
+	    	dialog.setResultConverter(new Callback<ButtonType, setData>() {	
+				@Override
+				public setData call(ButtonType ok) {					
+					if(ok == okButton) {
+						return new setData(ipField2.getText(), portField2.getText(), nameField2.getText());
+					}
+		    		
+					return null;
 				}
-			});
+	    	});
 	    	
-		Optional<setData> result = dialog.showAndWait();
-		if(result.isPresent()) {
-			ipField.setText(serverIP = ipField2.getText());
-			portField.setText(serverPort = portField2.getText());
-			userName = "name:" + nameField2.getText();
-			System.out.println(serverIP + " " + userName + " " +serverPort);
-			
-			showSceneChanged(stage, root, "./chatRoom.css");
-			}
+	    	Optional<setData> result = dialog.showAndWait();
+	    	if(result.isPresent()) {
+	    		System.out.println(ipField2.getText() + " " + nameField2.getText() + " " + portField2.getText());
+	    		
+	    		serverIP = ipField2.getText();
+	    		ipField.setText(ipField2.getText());
+	    		serverPort = portField2.getText();
+	    		portField.setText(portField2.getText());
+	    		userName = "name:" + nameField2.getText();
+	    		showSceneChanged(stage, root);
+	    	}
 	    	
-		chatField.setOnKeyPressed(e -> {if (e.getCode() == KeyCode.ENTER) {sendButton.getOnAction().handle(null);}});
-		sendButton.setOnAction(new EventHandler<ActionEvent>() {
-		    @Override
-		    public void handle(ActionEvent event) {
-			send(chatField.getText());
-			chatField.setText("");
-			chatField.requestFocus();
-		    }
-		});
+	    	chatField.setOnKeyPressed(e -> {if (e.getCode() == KeyCode.ENTER) {sendButton.getOnAction().handle(null);}});
+	    	sendButton.setOnAction(new EventHandler<ActionEvent>() {
+	    	    @Override
+	    	    public void handle(ActionEvent event) {
+	    	    	send(chatField.getText());
+	    	    	chatField.setText("");
+	    	    	chatField.requestFocus();
+	    	    }
+	    	});
 	    	
-		stage.setOnCloseRequest(e -> {endButton.getOnAction().handle(null);});
-		endButton.setOnAction(event -> {						//endButton check delete
-			send("quit" + userName);
-			try{Thread.sleep(150);}catch(Exception e){e.printStackTrace();} 	// sleep(150) <- (100)(50)
-			Quiz.interrupted();
-			try {Thread.sleep(50);} catch(Exception e2) {} 
-			Timer.interrupted();
-			stopClient();
-			stage.close();														// stage.close() <- stage.hide() 
-		});	
-	   } catch(Exception e) {
-		   System.out.println(e);
-	   }	   	
+	    	endButton.setOnAction(new EventHandler<ActionEvent>() {
+	    	    @Override
+	    	    public void handle(ActionEvent event) {
+	    	    	if(endButton.getText().equals("¡¢ º” «œ ±‚")) {
+	    	    		startClient(ipField.getText(), Integer.parseInt(portField.getText()));
+	    	    		Platform.runLater(() -> {
+	    	    			chatlog.appendText("[ √§∆√πÊ ¡¢º” ]\n");
+	    	    		});
+	    	    		endButton.setText("¡æ ∑· «œ ±‚");
+	    	    		try {Thread.sleep(200);} catch(Exception e2) {} 
+	    	    		send(userName);
+	    	    	}
+	    	    	
+	    	    	else if(endButton.getText().equals("¡æ ∑· «œ ±‚")){
+		    	    	send("quit" + userName);
+		    	    	try{
+		    	    		Thread.sleep(100);
+		    	    	}catch(Exception e){
+		    	    		e.printStackTrace();
+		    	    	}
+		    	    	try {Thread.sleep(50);} catch(Exception e2) {} 
+						Quiz.interrupted();
+						try {Thread.sleep(50);} catch(Exception e2) {} 
+						Timer.interrupted();
+						try {Thread.sleep(50);} catch(Exception e2) {} 
+		    	    	stopClient();
+		    	    	try {Thread.sleep(50);} catch(Exception e2) {} 
+		    	    	stage.hide();
+	    	    	}
+	    	    }
+	    	});
+	    	
+	    	stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+	            public void handle(WindowEvent we) {
+	            	if(endButton.getText().equals("¡¢ º” «œ ±‚")) {
+		    	    	try{
+		    	    		Thread.sleep(100);
+		    	    	}catch(Exception e){
+		    	    		e.printStackTrace();
+		    	    	}
+		    	    	stopClient();
+		    	    	stage.hide();
+	    	    	}
+	    	    	
+	    	    	else if(endButton.getText().equals("¡æ ∑· «œ ±‚")){
+		    	    	send("quit" + userName);
+		    	    	try{
+		    	    		Thread.sleep(100);
+		    	    	}catch(Exception e){
+		    	    		e.printStackTrace();
+		    	    	}
+		    	    	try {Thread.sleep(50);} catch(Exception e2) {} 
+						Quiz.interrupted();
+						try {Thread.sleep(50);} catch(Exception e2) {} 
+						Timer.interrupted();
+						try {Thread.sleep(50);} catch(Exception e2) {} 
+		    	    	stopClient();
+		    	    	try {Thread.sleep(50);} catch(Exception e2) {} 
+		    	    	stage.hide();
+	    	    	}
+	            }
+	    	});
+    	
+    	} catch(Exception e) {
+    		System.out.println(e);
+    	}
+	   	
 	}
 	
-	private void showSceneChanged(Stage stage, Parent nextRoot, String CSSfilelocation) { 
+	private void showSceneChanged(Stage stage, Parent nextRoot) { 
     	stage.hide();
  
     	scene = new Scene(nextRoot, 780, 600);
-    	stage.setTitle("Ï±ÑÌåÖÏ∞Ω");
+    	stage.setTitle("√§∆√√¢");
     	scene.getStylesheets().clear();
-    	scene.getStylesheets().add(getClass().getResource(CSSfilelocation).toExternalForm());
+    	scene.getStylesheets().add(getClass().getResource("./chatRoom.css").toExternalForm());
     	stage.setScene(scene); 
     	
     	stage.show();
     } 
 	
 	static class Quiz extends Thread{
-		public static void startQuiz(String temp) {
+		public static void startQuiz(String temp, String table) {
 			Thread thread = new Thread() {
 				public void run() {
 					Timer timer = new Timer();
 					try {
-						timer.startTimer();
-						
-						chatlog.setText("");
-						chatLogtemp = chatlog.getText();	
-						chatlog.appendText(quizDB.get(1) + "\n");
-						
-						sleep(6000);
-						
-						count++;
-						if(count == 6) {
+						if(count == 5) {
 							count = 0;
 							timerField.setText("");
-							System.out.println("Ï†ïÎãµ : " + correctResult + ", Ïò§Îãµ : " + incorrectResult);
-							send("userResultÏ†ïÎãµ : " + correctResult + ", Ïò§Îãµ : " + incorrectResult);
+							userResultLog = "¡§¥‰ : " + correctResult + ", ø¿¥‰ : " + incorrectResult;
+							System.out.println("¡§¥‰ : " + correctResult + ", ø¿¥‰ : " + incorrectResult);
+							try {sleep(50);} catch(Exception e) {} Timer.interrupted();
+							send("endquiz");
+							chatlog.appendText(userName.substring(5) + " > " + "¡§¥‰ : " + correctResult + ", ø¿¥‰ : " + incorrectResult + "\n");
 							correctResult = 0;
 							incorrectResult = 0;
-							chatlog.setText(chatLogtemp);
-							try {sleep(50);} catch(Exception e) {} Timer.interrupted();
 							try {sleep(50);} catch(Exception e) {} Quiz.interrupted();
 							return;
 						}
 						
+						timer.startTimer();
+						
+						chatlog.setText("");
+						chatlog.appendText(quizDB.get(1) + "\n");
+							
+						sleep(6000);
+						count++;
+						
 						try {sleep(100);} catch(Exception e) {}
 						if(!temp.equals(userResult)) { incorrectResult++; userResult = ""; }
-						send("Îã§Ïùå");
+						send("¥Ÿ¿Ω/" + table);
 					} catch (Exception e) {
 						try {sleep(50);} catch(Exception e2) {} 
 						Quiz.interrupted();
@@ -213,13 +323,13 @@ public class ChatClient extends Application{
 	}
 	
 	static class Timer extends Thread{
-		public void startTimer() {
+		public synchronized void startTimer() {
 			Thread thread = new Thread() {
 				public void run() {
 					int second = 5;
 					while(second >= 0) {						
 						try {
-							timerField.setText(" " + Integer.toString(second) + "Ï¥à");
+							timerField.setText(" " + Integer.toString(second) + "√ ");
 							second--;
 							sleep(1000);
 						} catch (Exception e) {
@@ -239,10 +349,12 @@ public class ChatClient extends Application{
 			return true;
 		}
 		
-		else {
+		else if(!result.equals(quizResult)){
 			incorrectResult++;
 			return false;
 		}
+		
+		return false;
 	}
 	
 	public static void runQuiz() {
@@ -263,7 +375,7 @@ public class ChatClient extends Application{
 		}
 	}
 	
-	public static void receive() {
+	public static synchronized void receive() {
 		while(true) {
 			try {
 				InputStream in = socket.getInputStream();
@@ -274,35 +386,29 @@ public class ChatClient extends Application{
 
 				Platform.runLater(()->{
 					if(message.length() >= 1 && message.substring(0,1).equals("m")) {
-						if(message.length() >= 6 && message.substring(0, 5).equals("mquiz")) {
+						if(message.length() >= 5 && message.substring(0, 5).equals("mquiz")) {
 							quizDB.put(1, message.split("\\^")[2]);
 							result = message.split("\\^")[3];
 							System.out.println(result);
-							Quiz.startQuiz(result);
+							Quiz.startQuiz(result, message.split("\\^")[0].substring(5));
 						}
 						
-						else if(message.length() >= 3 && message.substring(0, 3).equals("mÎãµ:")) {
-							System.out.println(message.substring(3));
-							userResult = message.substring(3);
-							if(mark(message.substring(3))) {
-								send("Ï†ïÎãµÏûÖÎãàÎã§.\n");
+						else if(message.length() >= 14 && message.substring(0, 14).equals("mresultrequest")) {
+							send("resultsend" + userName.substring(5) + " > " +  userResultLog);
+							try {
+								Thread.sleep(100);
+							} catch(Exception e) {
+								System.out.println("sleep ø¿∑˘");	
 							}
-							
-							else {
-								send("Ïò§ÎãµÏûÖÎãàÎã§.\n");
-							}
-							
 						}
 						
 						
 						else if(message.length() >= 7 && message.substring(0, 7).equals("mDBquiz")) {
-							quizlog.setText("ÌÄ¥Ï¶à Î™©Î°ù\n--------\n");
+							quizlog.setText("ƒ˚¡Ó ∏Ò∑œ\n--------\n");
 							quizlog.appendText(message.substring(7));
 						}
 						
-						else if(message.length() >= 10 && message.substring(0, 10).equals("userResult")) {
-							chatlog.appendText(message.substring(10));
-						}
+						else if(message.length() >= 4 && message.substring(0, 4).equals("m¥Ÿ¿Ω/")) {}
 						
 						else
 							chatlog.appendText(message.substring(1) + "\n");
@@ -317,6 +423,10 @@ public class ChatClient extends Application{
 							&& loging.getText().contains(message.substring(6))) {
 						loging.setText(loging.getText().replace(message.substring(6)+"\n", ""));
 						System.out.println(message.substring(6));
+					}
+					
+					else if(message.length() >= 7 && message.substring(0, 7).equals("setName")) {
+						userName = message.substring(7);
 					}
 					
 					
@@ -335,6 +445,13 @@ public class ChatClient extends Application{
 				try {
 					OutputStream out = socket.getOutputStream();
 					byte[] buffer = message.getBytes("UTF-8");
+					String temp = new String(buffer, "UTF-8");
+					System.out.println(temp);
+					if(temp.length() >= 2 && temp.substring(0,2).equals("¥‰:")) {
+						System.out.println(temp);
+						userResult = temp.substring(2);
+						mark(temp.substring(2));
+					}
 					out.write(buffer);
 					out.flush();
 				} catch (Exception e) {
@@ -355,7 +472,7 @@ public class ChatClient extends Application{
 				} catch (Exception e) {
 					if(!socket.isClosed()) {
 					stopClient();
-					System.out.println("[ÏÑúÎ≤Ñ Ï†ëÏÜç Ïã§Ìå®]");
+					System.out.println("[º≠πˆ ¡¢º” Ω«∆–]");
 					Platform.exit();
 					}
 				}
